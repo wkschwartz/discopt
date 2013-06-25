@@ -18,7 +18,10 @@
  * @author William Schwartz
  */
 
+import java.util.Arrays;
+
 public class Knapsack {
+	private static final double EPS = 1e-6; // epsilon for comparing floats
 	private final int n, k; // n: number of items; k: weight capacity
 	private final int[] v, w; // v: values; w: weights;
 	private boolean optimal; // whether solution proved optimal
@@ -108,36 +111,88 @@ public class Knapsack {
 		return s.toString();
 	}
 
+	private class Item implements Comparable {
+		private double ratio;
+		private int i;
+		public Item(int i) {
+			this.i = i;
+			ratio = (double) v[i] / w[i];
+		}
+		public int i() { return i; }
+		public int compareTo(Object o) {
+			if (o == null)
+				throw new NullPointerException("cannot compare to null");
+			Item other = (Item) o;
+			if      (ratio <  other.ratio) return -1;
+			else if (ratio == other.ratio) return  0;
+			else                           return  1;
+		}
+	}
+
 	/**
 	 * Fill the knapsack as optimally as possible. Results stored in instance
 	 * variables <code>x</code> and <code>optimal</code>.
 	 */
 	private void fill() {
+		Item[] items = new Item[n];
 		int[] t = new int[n];
-		for (int i = 1; i < n; i++)
+		for (int i = 0; i < n; i++) {
 			t[i] = -1;
+			items[i] = new Item(i);
+		}
+		Arrays.sort(items);
 		t[0] = 0;
-		int best = branch(t, 0, 0, 0, 0);
+		int best = branch(t, 0, 0, 0, 0, items);
 		t[0] = 1;
-		best = branch(t, 0, 0, 0, best);
+		best = branch(t, 0, 0, 0, best, items);
 		assert objective() == best;
 	}
 
-	private int branch(int[] t, int i, int prevValue, int prevWeight, int best)
+	// Return an upper bound for the value at the best leaf of this search node.
+	// t is the decision vector being tested, i is the row in the decision tree
+	// (which item is being tested for in vs. out status), and items is a sorted
+	// array of Item objects.
+	private double bound(int[] t, int i, Item[] items) {
+		int item, wi;
+		double fraction, weight = 0.0, value = 0.0;
+		for (int j = 0; j <= i; j++) {
+			assert t[j] == 0 || t[j] == 1; // By definition of i.
+			value += v[j] * t[j];
+			weight += w[j] * t[j];
+		}
+		assert weight - k <= EPS; // Because of where bound is called in branch.
+		if (Math.abs(weight - k) <= EPS)
+			return value;
+		for (int j = n - 1; j >= 0 && weight < k; j--) {
+			item = items[j].i();
+			if (item <= i)
+				continue;
+			wi = w[item];
+			fraction = Math.min(1.0, (double) (k - weight) / wi);
+			weight += fraction * wi;
+			value += fraction * v[item];
+		}
+		return value;
+	}
+
+	private int branch(int[] t, int i, int prevValue, int prevWeight, int best,
+					   Item[] items)
 	{
 		assert i < n && (t[i] == 0 || t[i] == 1);
 		int weight = prevWeight + w[i] * t[i];
 		if (weight > k)
 			return best;
+		if (bound(t, i, items) < best)
+			return best;
 		int value = prevValue + v[i] * t[i];
 		int newBest = value > best ? value : best;
 		if (i < n - 1) {
 			t[i + 1] = 0;
-			int leftBest = branch(t, i + 1, value, weight, newBest);
+			int leftBest = branch(t, i + 1, value, weight, newBest, items);
 			newBest = newBest > leftBest ? newBest : leftBest;
 
 			t[i + 1] = 1;
-			int rightBest = branch(t, i + 1, value, weight, newBest);
+			int rightBest = branch(t, i + 1, value, weight, newBest, items);
 			newBest = newBest > rightBest ? newBest : rightBest;
 
 			t[i + 1] = -1; // So we return t to caller like we found it
