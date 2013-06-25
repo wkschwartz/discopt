@@ -4,6 +4,16 @@
  * Usage: <code>java Knapsack &lt; inputfile.txt</code>
  * <p>
  * Dependencies: StdIn.java (by Sedgwick and Wayne)
+ * <p>
+ * This program (or library -- there is a Java-native constructor available) takes as
+ * input <var>n</var>-length vectors <var>v</var> of values and <var>w</var> of weights,
+ * all integers, as well as an integer <var>k</var> capacity. Then it finds the vector
+ * <var>x</var> of length <var>n</var> whose elements are in {0, 1} such that <var>x</var>
+ * maximizes <br />
+ *            $$ sum^{n-1}_{i=0}{v_i * x_i} $$
+ * subject to <br />
+ *            $$ sum^{n-1}_{i=0}{w_i * x_i} \le k $$
+ * and makes the values of <var>x</var> available through the <code>item</code> method.
  *
  * @author William Schwartz
  */
