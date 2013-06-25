@@ -57,7 +57,7 @@ public class Knapsack {
 	 * @param i the index of the decision variable being queried
 	 */
 	public boolean item(int i) {
-		return x[i] != 0 ? true : false;
+		return x[i] == 1;
 	}
 
 	/**
