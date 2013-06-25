@@ -121,7 +121,43 @@ public class Knapsack {
 	 * variables <code>x</code> and <code>optimal</code>.
 	 */
 	private void fill() {
-		throw new UnsupportedOperationException("not implemented yet");
+		int[] t = new int[n];
+		for (int i = 1; i < n; i++)
+			t[i] = -1;
+		t[0] = 0;
+		int best = branch(t, 0, 0, 0, 0);
+		t[0] = 1;
+		best = branch(t, 0, 0, 0, best);
+		assert objective() == best;
+	}
+
+	private int branch(int[] t, int i, int prevValue, int prevWeight, int best)
+	{
+		assert i < n && (t[i] == 0 || t[i] == 1);
+		int weight = prevWeight + w[i] * t[i];
+		if (weight > k)
+			return best;
+		int value = prevValue + v[i] * t[i];
+		int newBest = value > best ? value : best;
+		if (i < n - 1) {
+			t[i + 1] = 0;
+			int leftBest = branch(t, i + 1, value, weight, newBest);
+			newBest = newBest > leftBest ? newBest : leftBest;
+
+			t[i + 1] = 1;
+			int rightBest = branch(t, i + 1, value, weight, newBest);
+			newBest = newBest > rightBest ? newBest : rightBest;
+
+			t[i + 1] = -1; // So we return t to caller like we found it
+		}
+		else if (newBest > best) {
+			x = new int[n];
+			System.arraycopy(t, 0, x, 0, n);
+			// This solution might not be optimal, but the last branch to set
+			// this flag will be. XXX not thread safe obviously.
+			optimal = true;
+		}
+		return newBest;
 	}
 
 	/**
