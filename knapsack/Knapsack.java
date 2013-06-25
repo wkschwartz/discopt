@@ -113,6 +113,7 @@ public class Knapsack {
 			if (i < n - 1)
 				s.append(' ');
 		}
+		s.append('\n');
 		return s.toString();
 	}
 
