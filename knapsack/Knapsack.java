@@ -19,9 +19,10 @@
  */
 
 public class Knapsack {
-	private final boolean optimal; // whether solution proved optimal
 	private final int n, k; // n: number of items; k: weight capacity
-	private final int[] v, w, x; // v: values; w: weights; x: decisions;
+	private final int[] v, w; // v: values; w: weights;
+	private boolean optimal; // whether solution proved optimal
+	private int[] x; // x: decisions
 
 	/**
 	 * Initialize a new knapsack and fill it optimally. Note that parameters
@@ -38,16 +39,12 @@ public class Knapsack {
 		if (n < 1)
 			throw new IllegalArgumentException("no items to put in knapsack");
 		this.k = k;
-		x = new int[n];
-		optimal = false;
-		// Defensive copy
 		this.v = new int[n];
 		this.w = new int[n];
-		for (int i = 0; i < n; i++) {
-			this.v[i] = v[i];
-			this.w[i] = w[i];
-		}
-		fill();
+		System.arraycopy(v, 0, this.v, 0, n);
+		System.arraycopy(w, 0, this.w, 0, n);
+		optimal = false;
+		fill(); // sets x and possibly flips optimal
 		assert feasible();
 	}
 
