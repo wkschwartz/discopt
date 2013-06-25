@@ -48,6 +48,7 @@ public class Knapsack {
 			this.w[i] = w[i];
 		}
 		fill();
+		assert feasible();
 	}
 
 	/**
@@ -74,6 +75,16 @@ public class Knapsack {
 	 */
 	public boolean optimal() {
 		return optimal;
+	}
+
+	/**
+	 * Return true if the solution is feasible.
+	 */
+	public boolean feasible() {
+		int weight = 0;
+		for (int i = 0; i < n; i++)
+			weight += w[i] * x[i];
+		return weight <= k;
 	}
 
 	/**
