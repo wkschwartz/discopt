@@ -121,7 +121,7 @@ public class Knapsack {
 		int best = branch(t, 0, 0, 0, 0);
 		t[0] = 1;
 		best = branch(t, 0, 0, 0, best);
-		assert objective() == best;
+		optimal = objective() == best;
 	}
 
 	private int branch(int[] t, int i, int prevValue, int prevWeight, int best)
@@ -141,12 +141,8 @@ public class Knapsack {
 							   newBest);
 			t[i + 1] = -1; // So we return t to caller like we found it
 		}
-		else if (newBest > best) {
+		else if (newBest > best)
 			System.arraycopy(t, 0, x, 0, n);
-			// This solution might not be optimal, but the last branch to set
-			// this flag will be. XXX not thread safe obviously.
-			optimal = true;
-		}
 		return newBest;
 	}
 
