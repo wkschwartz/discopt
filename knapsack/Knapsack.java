@@ -131,16 +131,14 @@ public class Knapsack {
 		if (weight > k)
 			return best;
 		int value = prevValue + v[i] * t[i];
-		int newBest = value > best ? value : best;
+		int newBest = Math.max(value, best);
 		if (i < n - 1) {
 			t[i + 1] = 0;
-			int leftBest = branch(t, i + 1, value, weight, newBest);
-			newBest = newBest > leftBest ? newBest : leftBest;
-
+			newBest = Math.max(branch(t, i + 1, value, weight, newBest),
+							   newBest);
 			t[i + 1] = 1;
-			int rightBest = branch(t, i + 1, value, weight, newBest);
-			newBest = newBest > rightBest ? newBest : rightBest;
-
+			newBest = Math.max(branch(t, i + 1, value, weight, newBest),
+							   newBest);
 			t[i + 1] = -1; // So we return t to caller like we found it
 		}
 		else if (newBest > best) {
