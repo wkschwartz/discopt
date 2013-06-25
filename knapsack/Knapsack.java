@@ -99,20 +99,12 @@ public class Knapsack {
 		StringBuilder s = new StringBuilder();
 		s.append(objective());
 		s.append(' ');
-		if (optimal())
-			s.append(1);
-		else
-			s.append(0);
+		s.append(optimal() ? 1 : 0);
 		s.append('\n');
 		for (int i = 0; i < n; i++) {
-			if (item(i))
-				s.append(1);
-			else
-				s.append(0);
-			if (i < n - 1)
-				s.append(' ');
+			s.append(item(i) ? 1 : 0);
+			s.append(i < n - 1 ? ' ' : '\n');
 		}
-		s.append('\n');
 		return s.toString();
 	}
 
