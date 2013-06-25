@@ -79,8 +79,11 @@ public class Knapsack {
 	 */
 	public boolean feasible() {
 		int weight = 0;
-		for (int i = 0; i < n; i++)
+		for (int i = 0; i < n; i++) {
+			if (x[i] != 0 || x[i] != 1)
+				return false;
 			weight += w[i] * x[i];
+		}
 		return weight <= k;
 	}
 
