@@ -74,17 +74,16 @@ public class Knapsack {
 		return optimal;
 	}
 
-	/**
-	 * Return true if the solution is feasible.
-	 */
-	public boolean feasible() {
+	// Assertions that the soluiton is feasible. Only called by assert. Return
+	// value is useless.
+	private boolean feasible() {
 		int weight = 0;
 		for (int i = 0; i < n; i++) {
-			if (x[i] != 0 || x[i] != 1)
-				return false;
+			assert x[i] == 0 || x[i] == 1;
 			weight += w[i] * x[i];
 		}
-		return weight <= k;
+		assert weight <= k;
+		return true;
 	}
 
 	/**
