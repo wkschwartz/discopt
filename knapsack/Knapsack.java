@@ -21,9 +21,8 @@
 
 public class Knapsack {
 	private final int n, k; // n: number of items; k: weight capacity
-	private final int[] v, w; // v: values; w: weights;
+	private final int[] v, w, x; // v: values; w: weights; x: decisions
 	private boolean optimal; // whether solution proved optimal
-	private int[] x; // x: decisions
 
 	/**
 	 * Initialize a new knapsack and fill it optimally. Note that parameters
@@ -44,6 +43,7 @@ public class Knapsack {
 		this.w = new int[n];
 		System.arraycopy(v, 0, this.v, 0, n);
 		System.arraycopy(w, 0, this.w, 0, n);
+		x = new int[n];
 		optimal = false;
 		fill(); // sets x and possibly flips optimal
 		assert feasible();
@@ -144,7 +144,6 @@ public class Knapsack {
 			t[i + 1] = -1; // So we return t to caller like we found it
 		}
 		else if (newBest > best) {
-			x = new int[n];
 			System.arraycopy(t, 0, x, 0, n);
 			// This solution might not be optimal, but the last branch to set
 			// this flag will be. XXX not thread safe obviously.
