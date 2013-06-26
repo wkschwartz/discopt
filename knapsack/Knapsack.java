@@ -135,12 +135,12 @@ public class Knapsack {
 
 	// Return an upper bound for the value at the best leaf of current search
 	// node.  See where bound() is called to understand its paramaters.
-	private double bound(int i, double weight, double value, Item[] items) {
+	private double bound(int i, double weight, double value, int[] items) {
 		int item, wi;
 		double fraction;
 		assert weight < k; // Because of when bound is called in fill
 		for (int j = n - 1; j >= 0; j--) {
-			item = items[j].i();
+			item = items[j];
 			if (item <= i)
 				continue;
 			wi = w[item];
@@ -165,13 +165,16 @@ public class Knapsack {
 		// ss: stack size: Always <=2 children on stack for <=n-1 parents
 		Item[] items = new Item[n];
 		int ss = 2 * n;
-		int[] t = new int[n], ws = new int[ss], vs = new int[ss],
-			is = new int[ss], bs = new int[ss];
+		int[] itemsSorted = new int[n], t = new int[n], ws = new int[ss],
+			vs = new int[ss], is = new int[ss], bs = new int[ss];
 		int i, b, weight, value, best = 0, p = 0;
 
 		for (int j = 0; j < n; j++)
 			items[j] = new Item(j);
 		Arrays.sort(items);
+		for (int j = 0; j < n; j++)
+			itemsSorted[j] = items[j].i();
+		items = null; // For garbage collection.
 
 		// Push item 0 onto the stack with and without bringing it.
 		ws[p] = 0; vs[p] = 0; is[p] = 0; bs[p] = 1; p++;
@@ -184,7 +187,7 @@ public class Knapsack {
 			if (weight > k)
 				continue;
 			value = vs[p] + v[i] * b;
-			if (bound(i, weight, value, items) < best)
+			if (bound(i, weight, value, itemsSorted) < best)
 				continue;
 			best = Math.max(value, best);
 			t[i] = b;
