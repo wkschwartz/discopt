@@ -158,6 +158,7 @@ public class Knapsack {
 	private double bound(int i, double weight, double value, Item[] items) {
 		int item, wi;
 		double fraction;
+		assert weight < k; // Because of when bound is called in fill
 		for (int j = n - 1; j >= 0; j--) {
 			item = items[j].i();
 			if (item <= i)
