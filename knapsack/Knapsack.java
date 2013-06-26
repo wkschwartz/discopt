@@ -145,7 +145,8 @@ public class Knapsack {
 							   newBest);
 			t[i + 1] = -1; // So we return t to caller like we found it
 		}
-		else if (newBest > best)
+		// Must include equality in case best came from higher up the branch
+		else if (value >= best)
 			System.arraycopy(t, 0, x, 0, n);
 		return newBest;
 	}
