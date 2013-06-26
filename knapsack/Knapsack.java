@@ -5,15 +5,16 @@
  * <p>
  * Dependencies: StdIn.java (by Sedgwick and Wayne)
  * <p>
- * This program (or library -- there is a Java-native constructor available) takes as
- * input <var>n</var>-length vectors <var>v</var> of values and <var>w</var> of weights,
- * all integers, as well as an integer <var>k</var> capacity. Then it finds the vector
- * <var>x</var> of length <var>n</var> whose elements are in {0, 1} such that <var>x</var>
- * maximizes <br />
- *            $$ sum^{n-1}_{i=0}{v_i * x_i} $$
- * subject to <br />
- *            $$ sum^{n-1}_{i=0}{w_i * x_i} \le k $$
- * and makes the values of <var>x</var> available through the <code>item</code> method.
+ * This program (or library -- there is a Java-native constructor available)
+ * takes as input <var>n</var>-length vectors <var>v</var> of values and
+ * <var>w</var> of weights, all integers, as well as an integer <var>k</var>
+ * capacity. Then it finds the vector <var>x</var> of length <var>n</var> whose
+ * elements are in {0, 1} such that <var>x</var> maximizes <br>
+ *            $$ sum^{n-1}_{i=0}{v_i * x_i} $$ <br>
+ * subject to <br>
+ *            $$ sum^{n-1}_{i=0}{w_i * x_i} \le k $$ <br>
+ * and makes the values of <var>x</var> available through the <code>item</code>
+ * method.
  *
  * @author William Schwartz
  */
@@ -23,9 +24,8 @@ import java.util.Arrays;
 public class Knapsack {
 	private static final double EPS = 1e-6; // epsilon for comparing floats
 	private final int n, k; // n: number of items; k: weight capacity
-	private final int[] v, w; // v: values; w: weights;
+	private final int[] v, w, x; // v: values; w: weights; x: decisions
 	private boolean optimal; // whether solution proved optimal
-	private int[] x; // x: decisions
 
 	/**
 	 * Initialize a new knapsack and fill it optimally. Note that parameters
@@ -46,6 +46,7 @@ public class Knapsack {
 		this.w = new int[n];
 		System.arraycopy(v, 0, this.v, 0, n);
 		System.arraycopy(w, 0, this.w, 0, n);
+		x = new int[n];
 		optimal = false;
 		fill(); // sets x and possibly flips optimal
 		assert feasible();
@@ -59,6 +60,11 @@ public class Knapsack {
 	public boolean item(int i) {
 		return x[i] == 1;
 	}
+
+	/**
+	 * Return problem size
+	 */
+	public int size() { return n; }
 
 	/**
 	 * Return the value of the objective function given the solution.
@@ -85,8 +91,7 @@ public class Knapsack {
 			assert x[i] == 0 || x[i] == 1;
 			weight += w[i] * x[i];
 		}
-		assert weight <= k;
-		return true;
+		return weight <= k;
 	}
 
 	/**
@@ -145,7 +150,7 @@ public class Knapsack {
 		int best = branch(t, 0, 0, 0, 0, items);
 		t[0] = 1;
 		best = branch(t, 0, 0, 0, best, items);
-		assert objective() == best;
+		optimal = objective() == best;
 	}
 
 	// Return an upper bound for the value at the best leaf of this search node.
@@ -185,25 +190,19 @@ public class Knapsack {
 		if (bound(t, i, items) < best)
 			return best;
 		int value = prevValue + v[i] * t[i];
-		int newBest = value > best ? value : best;
+		int newBest = Math.max(value, best);
 		if (i < n - 1) {
 			t[i + 1] = 0;
-			int leftBest = branch(t, i + 1, value, weight, newBest, items);
-			newBest = newBest > leftBest ? newBest : leftBest;
-
+			newBest = Math.max(branch(t, i + 1, value, weight, newBest, items),
+							   newBest);
 			t[i + 1] = 1;
-			int rightBest = branch(t, i + 1, value, weight, newBest, items);
-			newBest = newBest > rightBest ? newBest : rightBest;
-
+			newBest = Math.max(branch(t, i + 1, value, weight, newBest, items),
+							   newBest);
 			t[i + 1] = -1; // So we return t to caller like we found it
 		}
-		else if (newBest > best) {
-			x = new int[n];
+		// Must include equality in case best came from higher up the branch
+		else if (value >= best)
 			System.arraycopy(t, 0, x, 0, n);
-			// This solution might not be optimal, but the last branch to set
-			// this flag will be. XXX not thread safe obviously.
-			optimal = true;
-		}
 		return newBest;
 	}
 
