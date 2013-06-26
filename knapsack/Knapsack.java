@@ -159,14 +159,16 @@ public class Knapsack {
 	private double bound(int[] t, int i, double weight, double value, Item[] items) {
 		int item, wi;
 		double fraction;
-		for (int j = n - 1; j >= 0 && weight < k; j--) {
+		for (int j = n - 1; j >= 0; j--) {
 			item = items[j].i();
 			if (item <= i)
 				continue;
 			wi = w[item];
 			fraction = Math.min(1.0, (double) (k - weight) / wi);
 			weight += fraction * wi;
-			value += fraction * v[item];
+			if (weight < k)
+				value += fraction * v[item];
+			else break;
 		}
 		return value;
 	}
