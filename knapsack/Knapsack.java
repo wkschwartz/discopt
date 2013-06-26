@@ -153,10 +153,9 @@ public class Knapsack {
 	}
 
 	// Return an upper bound for the value at the best leaf of this search node.
-	// t is the decision vector being tested, i is the row in the decision tree
-	// (which item is being tested for in vs. out status), and items is a sorted
-	// array of Item objects.
-	private double bound(int[] t, int i, double weight, double value, Item[] items) {
+	// i is the row in the decision tree (which item is being tested for in
+	// vs. out status), and items is a sorted array of Item objects.
+	private double bound(int i, double weight, double value, Item[] items) {
 		int item, wi;
 		double fraction;
 		for (int j = n - 1; j >= 0; j--) {
@@ -181,7 +180,7 @@ public class Knapsack {
 		if (weight > k)
 			return best;
 		int value = prevValue + v[i] * t[i];
-		if (bound(t, i, weight, value, items) < best)
+		if (bound(i, weight, value, items) < best)
 			return best;
 		int newBest = Math.max(value, best);
 		if (i < n - 1) {
