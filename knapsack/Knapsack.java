@@ -138,17 +138,43 @@ public class Knapsack {
 	 * variables <code>x</code> and <code>optimal</code>.
 	 */
 	private void fill() {
+		// items: Items sorted by value-to-weight ratio for linear relaxation
+		// t: the decision vector being tested at each node
+		// ws, vs, is, bs: stacks of weight, value, item id, whether bring item
+		// p: stack pointer; i, b, weight, value: loop caches; best: max search
+		// ss: stack size: Always <=2 children on stack for <=n-1 parents
 		Item[] items = new Item[n];
-		int[] t = new int[n];
-		for (int i = 0; i < n; i++) {
-			t[i] = -1;
-			items[i] = new Item(i);
-		}
+		int ss = 2 * n;
+		int[] t = new int[n], ws = new int[ss], vs = new int[ss],
+			is = new int[ss], bs = new int[ss];
+		int i, b, weight, value, best = 0, p = 0;
+
+		for (int j = 0; j < n; j++)
+			items[j] = new Item(j);
 		Arrays.sort(items);
-		t[0] = 0;
-		int best = branch(t, 0, 0, 0, 0, items);
-		t[0] = 1;
-		best = branch(t, 0, 0, 0, best, items);
+
+		// Push item 0 onto the stack with and without bringing it.
+		ws[p] = 0; vs[p] = 0; is[p] = 0; bs[p] = 1; p++;
+		ws[p] = 0; vs[p] = 0; is[p] = 0; bs[p] = 0; p++;
+
+		while (p > 0) {
+			p--; // Pop the latest item off the stack
+			i = is[p]; b = bs[p];
+			weight = ws[p] + w[i] * b;
+			if (weight > k)
+				continue;
+			value = vs[p] + v[i] * b;
+			if (bound(i, weight, value, items) < best)
+				continue;
+			best = Math.max(value, best);
+			t[i] = b;
+			if (i < n - 1) { // Push children onto stack w/ & w/o bringing item
+				ws[p] = weight; vs[p] = value; is[p] = i + 1; bs[p] = 1; p++;
+				ws[p] = weight; vs[p] = value; is[p] = i + 1; bs[p] = 0; p++;
+			}
+			else if (value >= best)
+				System.arraycopy(t, 0, x, 0, n);
+		}
 		optimal = objective() == best;
 	}
 
@@ -171,32 +197,6 @@ public class Knapsack {
 			else break;
 		}
 		return value;
-	}
-
-	private int branch(int[] t, int i, int prevValue, int prevWeight, int best,
-					   Item[] items)
-	{
-		assert i < n && (t[i] == 0 || t[i] == 1);
-		int weight = prevWeight + w[i] * t[i];
-		if (weight > k)
-			return best;
-		int value = prevValue + v[i] * t[i];
-		if (bound(i, weight, value, items) < best)
-			return best;
-		int newBest = Math.max(value, best);
-		if (i < n - 1) {
-			t[i + 1] = 0;
-			newBest = Math.max(branch(t, i + 1, value, weight, newBest, items),
-							   newBest);
-			t[i + 1] = 1;
-			newBest = Math.max(branch(t, i + 1, value, weight, newBest, items),
-							   newBest);
-			t[i + 1] = -1; // So we return t to caller like we found it
-		}
-		// Must include equality in case best came from higher up the branch
-		else if (value >= best)
-			System.arraycopy(t, 0, x, 0, n);
-		return newBest;
 	}
 
 	/**
