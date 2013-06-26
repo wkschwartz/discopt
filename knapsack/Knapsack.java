@@ -46,9 +46,9 @@ public class Knapsack {
 		System.arraycopy(v, 0, this.v, 0, n);
 		System.arraycopy(w, 0, this.w, 0, n);
 		x = new int[n];
-		optimal = false;
-		fill(); // sets x and possibly flips optimal
+		int max = optimize(); // sets x
 		assert feasible();
+		optimal = objective() == max;
 	}
 
 	/**
@@ -133,11 +133,31 @@ public class Knapsack {
 		}
 	}
 
+	// Return an upper bound for the value at the best leaf of current search
+	// node.  See where bound() is called to understand its paramaters.
+	private double bound(int i, double weight, double value, Item[] items) {
+		int item, wi;
+		double fraction;
+		assert weight < k; // Because of when bound is called in fill
+		for (int j = n - 1; j >= 0; j--) {
+			item = items[j].i();
+			if (item <= i)
+				continue;
+			wi = w[item];
+			fraction = Math.min(1.0, (double) (k - weight) / wi);
+			weight += fraction * wi;
+			if (weight < k)
+				value += fraction * v[item];
+			else break;
+		}
+		return value;
+	}
+
 	/**
 	 * Fill the knapsack as optimally as possible. Results stored in instance
-	 * variables <code>x</code> and <code>optimal</code>.
+	 * variables <code>x</code>. Return best objective value found.
 	 */
-	private void fill() {
+	private int optimize() {
 		// items: Items sorted by value-to-weight ratio for linear relaxation
 		// t: the decision vector being tested at each node
 		// ws, vs, is, bs: stacks of weight, value, item id, whether bring item
@@ -175,28 +195,7 @@ public class Knapsack {
 			else if (value >= best)
 				System.arraycopy(t, 0, x, 0, n);
 		}
-		optimal = objective() == best;
-	}
-
-	// Return an upper bound for the value at the best leaf of this search node.
-	// i is the row in the decision tree (which item is being tested for in
-	// vs. out status), and items is a sorted array of Item objects.
-	private double bound(int i, double weight, double value, Item[] items) {
-		int item, wi;
-		double fraction;
-		assert weight < k; // Because of when bound is called in fill
-		for (int j = n - 1; j >= 0; j--) {
-			item = items[j].i();
-			if (item <= i)
-				continue;
-			wi = w[item];
-			fraction = Math.min(1.0, (double) (k - weight) / wi);
-			weight += fraction * wi;
-			if (weight < k)
-				value += fraction * v[item];
-			else break;
-		}
-		return value;
+		return best;
 	}
 
 	/**
