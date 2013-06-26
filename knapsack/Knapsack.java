@@ -22,7 +22,6 @@
 import java.util.Arrays;
 
 public class Knapsack {
-	private static final double EPS = 1e-6; // epsilon for comparing floats
 	private final int n, k; // n: number of items; k: weight capacity
 	private final int[] v, w, x; // v: values; w: weights; x: decisions
 	private boolean optimal; // whether solution proved optimal
@@ -157,17 +156,9 @@ public class Knapsack {
 	// t is the decision vector being tested, i is the row in the decision tree
 	// (which item is being tested for in vs. out status), and items is a sorted
 	// array of Item objects.
-	private double bound(int[] t, int i, Item[] items) {
+	private double bound(int[] t, int i, double weight, double value, Item[] items) {
 		int item, wi;
-		double fraction, weight = 0.0, value = 0.0;
-		for (int j = 0; j <= i; j++) {
-			assert t[j] == 0 || t[j] == 1; // By definition of i.
-			value += v[j] * t[j];
-			weight += w[j] * t[j];
-		}
-		assert weight - k <= EPS; // Because of where bound is called in branch.
-		if (Math.abs(weight - k) <= EPS)
-			return value;
+		double fraction;
 		for (int j = n - 1; j >= 0 && weight < k; j--) {
 			item = items[j].i();
 			if (item <= i)
@@ -187,9 +178,9 @@ public class Knapsack {
 		int weight = prevWeight + w[i] * t[i];
 		if (weight > k)
 			return best;
-		if (bound(t, i, items) < best)
-			return best;
 		int value = prevValue + v[i] * t[i];
+		if (bound(t, i, weight, value, items) < best)
+			return best;
 		int newBest = Math.max(value, best);
 		if (i < n - 1) {
 			t[i + 1] = 0;
