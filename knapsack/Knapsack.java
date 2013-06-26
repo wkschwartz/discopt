@@ -59,6 +59,11 @@ public class Knapsack {
 	}
 
 	/**
+	 * Return problem size
+	 */
+	public int size() { return n; }
+
+	/**
 	 * Return the value of the objective function given the solution.
 	 */
 	public int objective() {
