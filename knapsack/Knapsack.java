@@ -88,8 +88,7 @@ public class Knapsack {
 			assert x[i] == 0 || x[i] == 1;
 			weight += w[i] * x[i];
 		}
-		assert weight <= k;
-		return true;
+		return weight <= k;
 	}
 
 	/**
