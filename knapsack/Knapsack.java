@@ -137,18 +137,17 @@ public class Knapsack {
 	// node.  See where bound() is called to understand its paramaters.
 	private double bound(int i, double weight, double value, int[] items) {
 		int item, wi;
-		double fraction;
 		assert weight < k; // Because of when bound is called in fill
 		for (int j = n - 1; j >= 0; j--) {
 			item = items[j];
 			if (item <= i)
 				continue;
 			wi = w[item];
-			fraction = Math.min(1.0, (double) (k - weight) / wi);
-			weight += fraction * wi;
-			if (weight < k)
-				value += fraction * v[item];
-			else break;
+			if (wi < k - weight) {
+				weight += wi;
+				value += v[item];
+			}
+			else return value + ((double) (k - weight) / wi) * v[item];
 		}
 		return value;
 	}
