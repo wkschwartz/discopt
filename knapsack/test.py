@@ -5,6 +5,7 @@ import unittest
 import subprocess
 import os
 import glob
+import sys
 
 
 def load_tests(loader, tests, pattern):
@@ -30,6 +31,7 @@ class TestKnapsack:
 
 	@classmethod
 	def setUpClass(cls):
+		print('Compiling...', file=sys.stderr)
 		subprocess.check_call(cls.JAVAC + [cls.SOLVER + '.java'])
 
 	@classmethod
@@ -64,7 +66,7 @@ class TestKnapsack:
 		return self.EXPECTED_ANSWERS[self.test]
 
 	def test_answer(self):
-		result = subprocess.check_output(self.JAVA + [self.SOLVER],
+		result = subprocess.check_output(['time'] + self.JAVA + [self.SOLVER],
 										 stdin=self.data_file)
 		answer = int(result.decode('ascii').split()[0])
 		self.assertEqual(answer, self.expected_answer)
