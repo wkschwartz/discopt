@@ -22,6 +22,7 @@
 import java.util.Arrays;
 
 public class Knapsack {
+	private static final double EPS = .00001;
 	private final int n, k; // n: number of items; k: weight capacity
 	private final int[] v, w, x; // v: values; w: weights; x: decisions
 	private boolean optimal; // whether solution proved optimal
@@ -137,7 +138,7 @@ public class Knapsack {
 	// node.  See where bound() is called to understand its paramaters.
 	private double bound(int i, double weight, double value, int[] items) {
 		int item, wi;
-		assert weight < k; // Because of when bound is called in fill
+		assert weight - k < EPS; // Because of when bound is called in fill
 		for (int j = n - 1; j >= 0; j--) {
 			item = items[j];
 			if (item <= i)
