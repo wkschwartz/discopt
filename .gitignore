@@ -1,9 +1,6 @@
 *.py[cod]
 *.class
 
-# C extensions
-*.so
-
 # Packages
 *.egg
 *.egg-info
@@ -41,3 +38,26 @@ nosetests.xml
 # Emacs cruft
 \#*\#
 *~
+
+# C debug info
+*.dSYM
+
+## Github's recommended .gitignore for C
+
+# Object files
+*.o
+
+# Libraries
+*.lib
+*.a
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
