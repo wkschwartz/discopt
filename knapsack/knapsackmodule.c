@@ -16,6 +16,16 @@ typedef struct {
   unsigned int *x; /* decision array */
 } ks_problem_t;
 
+static void
+ks_problem_destroy(ks_problem_t *self)
+{
+  if (self == NULL) return;
+  if (self->v != NULL) free(self->v);
+  if (self->w != NULL) free(self->w);
+  if (self->x != NULL) free(self->x);
+  free(self);
+}
+
 static ks_problem_t*
 ks_problem_new(size_t n)
 {
@@ -27,6 +37,10 @@ ks_problem_new(size_t n)
   self->v = malloc(size);
   self->w = malloc(size);
   self->x = malloc(size);
+  if (self->v == NULL || self->w == NULL || self->x == NULL) {
+	ks_problem_destroy(self);
+	return NULL;
+  }
   return self;
 }
 
@@ -40,19 +54,10 @@ ks_problem_init(ks_problem_t *self, unsigned int k, unsigned int *v,
   for (i = 0; i < self->n; i++) {
 	self->v[i] = v[i];
 	self->w[i] = w[i];
+	self->x[i] = 0;
   }
 }
 
-
-static void
-ks_problem_destroy(ks_problem_t *self)
-{
-  if (self == NULL) return;
-  if (self->v != NULL) free(self->v);
-  if (self->w != NULL) free(self->w);
-  if (self->x != NULL) free(self->x);
-  free(self);
-}
 
 typedef struct {
   int i;
@@ -200,6 +205,14 @@ main(int argc, char *argv[])
   }
   ks_problem_init(ks, k, v, w);
   best = ks_optimize(ks);
+  if (best < 0) {
+	if (best == -1)
+	  fprintf(stderr, "out of memory\n");
+	else if (best == -2)
+	  fprintf(stderr, "rounding error: problem too large\n");
+	ks_problem_destroy(ks);
+	return best;
+  }
   printf("%d %d\n", best, 1);
   for (i = 0; i < n; i++)
 	printf("%d ", ks->x[i]);
