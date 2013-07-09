@@ -31,13 +31,10 @@ public class GraphColoring {
 		}
 
 		// Add the constraints
-		Constraint[] edges = new Constraint[g.E()];
-		int i = 0;
 		for (int v = 0; v < g.V(); v++)
 			for (int w : g.adj(v))
 				if (v < w) // So we don't count both v->w and w->v
-					edges[i++] = Choco.neq(nodes[v], nodes[w]);
-		m.addConstraints(edges);
+					m.addConstraint(Choco.neq(nodes[v], nodes[w]));
 
 		// Add the objective function
 		IntegerVariable obj = Choco.makeIntVar("obj", 0, g.V() - 1, Options.V_OBJECTIVE);
