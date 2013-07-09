@@ -30,7 +30,7 @@ public class GraphColoring {
 			m.addVariable(nodes[i]); // Add in case a node has no neighbors
 		}
 
-		// Add the constraints
+		// Add the edge constraints: adjacent nodes have different colors
 		for (int v = 0; v < g.V(); v++)
 			for (int w : g.adj(v))
 				if (v < w) // So we don't count both v->w and w->v
