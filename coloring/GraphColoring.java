@@ -9,8 +9,6 @@
 import choco.Choco;
 import choco.cp.solver.CPSolver;
 import choco.cp.model.CPModel;
-import choco.kernel.solver.Solver;
-import choco.kernel.model.Model;
 import choco.kernel.model.constraints.Constraint;
 import choco.kernel.model.variables.integer.IntegerVariable;
 
@@ -18,12 +16,12 @@ public class GraphColoring {
 	private static final int TIME_LIMIT = 10 * 1000; // 10 seconds
 
 	private final Graph g;
-	private final Solver s;
 	private final InterVariable[] nodes;
+	private final CPSolver s;
 
 	public GraphColoring(Graph g) {
 		g = new Graph(g); // defensive copy
-		Model m = new CPModel();
+		CPModel m = new CPModel();
 
 		// Create the decision variables
 		nodes = new IntegerVariable[g.V()];
