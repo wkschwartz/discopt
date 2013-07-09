@@ -16,8 +16,8 @@ public class GraphColoring {
 	private static final int TIME_LIMIT = 10 * 1000; // 10 seconds
 
 	private final Graph g;
-	private final InterVariable[] nodes;
 	private final CPSolver s;
+	private final IntegerVariable[] nodes;
 
 	public GraphColoring(Graph g) {
 		g = new Graph(g); // defensive copy
