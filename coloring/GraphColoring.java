@@ -25,8 +25,10 @@ public class GraphColoring {
 
 		// Create the decision variables
 		nodes = new IntegerVariable[g.V()];
-		for (int i = 0; i < g.V(); i++)
-			nodes[i] = Choco.makeIntVar("node" + i, 0, g.V() - 1);
+		for (int i = 0; i < g.V(); i++) {
+			nodes[i] = Choco.makeIntVar("node-" + i, 0, g.V() - 1);
+			m.addVariable(nodes[i]); // Add in case a node has no neighbors
+		}
 
 		// Add the constraints
 		Constraint[] edges = new Constraint[g.E()];
