@@ -28,6 +28,8 @@ public class GraphColor {
 		private final BitSet[] domain;
 		// cumm[i] = max(max(domain[0]), ..., max(domain[i]))
 		private final int[] cumm;
+		// count of solved nodes. -1 when infeasible.
+		private int count;
 
 		/** Instantiate a new search node. */
 		public SearchNode() {
@@ -38,6 +40,7 @@ public class GraphColor {
 				domain[i].set(0, V); // Second arg of set() is exclusive
 				cumm[i] = -1;
 			}
+			count = 0;
 		}
 
 		/** Copy constructor */
@@ -68,14 +71,19 @@ public class GraphColor {
 		}
 
 		/**
+		 * Return true if the solution is complete and feasible.
+		 */
+		public boolean solved() { return count == V; }
+
+		/**
 		 * Return an array of the colors found or null if the solution is either
 		 * infeasible or not yet found.
 		 */
 		public int[] solution() {
-			for (int v = 0; v < V; v++)
-				if (domain[v].cardinality() != 1)
-					return null;
-			int[] color = new int[V]; // Don't allocate memory until we have to.
+			int[] color;
+			if (!solved())
+				return null;
+			color = new int[V];
 			for (int v = 0; v < V; v++)
 				color[v] = domain[v].nextSetBit(0);
 			return color;
@@ -128,12 +136,16 @@ public class GraphColor {
 			newMax = domain[v].length() - 1;
 			assert v == 0 || newMax <= cumm[v - 1] + 1;
 
-			if (newMax < 0) // domain[v] is empty: constraint is infeasible.
+			if (newMax < 0) { // domain[v] is empty: constraint is infeasible.
+				count = -1;
 				return false;
-			else if (domain[v].cardinality() == 1) // newMax is v's color now.
+			}
+			else if (domain[v].cardinality() == 1) { // newMax is v's color now.
+				count++;
 				for (int w: g.adj(v)) // Enforce edge constraint.
 					if (!ruleOut(w, newMax, newMax + 1))
 						return false;
+			}
 			// The condition below ensures that cumm[v] will go down, meaning
 			// that a new constraint may be propogated. Note that when
 			// cumm[v] > cumm[v - 1], cumm[v] equals v's old max before the call
