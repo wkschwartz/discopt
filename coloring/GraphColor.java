@@ -153,9 +153,21 @@ public class GraphColor {
 
 	private int[] solve() {
 		SeachNode s = new SearchNode(V);
-		int start = 0; // TODO This should probably be the highest-degree node.
-		// Symmetry constraint: color[start] = 0;
-		s.setColor(start, 0, true);
+		// Symmetry constraint: color[start] = 0; further, since we will make
+		// guesses going from low numbered nodes up and from low color numbers
+		// up.
+		return branch(s, 0, 0, V - 1);
+	}
 
+	/** Branch and bound. */
+	private int[] branch(SearchNode s, int v, int color, int best) {
+		int[] color;
+		if (!s.setColor(v, color) || s.bound() > best) // short circuit
+			return null;
+		if ((color = s.solution()) != null)
+			return color;
+		// Now must make a guess for each node w in range(v + 1, V) and each
+		// color c in domain of w. Will likely have to add methods to SearchNode
+		// for this.
 	}
 }
