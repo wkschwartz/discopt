@@ -82,6 +82,11 @@ public class GraphColor {
 		}
 
 		/**
+		 * Return the value of the maximum color used.
+		 */
+		public int maxColor() { return cumm[V - 1]; }
+
+		/**
 		 * Add the constraint that vertex <code>v</code> is a given color.
 		 *
 		 * @return <code>false</code> if such a constraint causes
