@@ -12,6 +12,16 @@ public class GraphColor {
 		color = solve();
 	}
 
+	/**
+	 * Logical deductions from constraints added via setColor().
+	 * <p>
+	 * Enforces three constraints: <ul>
+	 * <li>all colors are integers in the interval [0, V)
+	 * <li>neighboring edges cannot share a color
+	 * <li>if the colors are in a V-length slice, then
+	 *     <blockquote><code>color[v] <= max(colorv[:v]) + 1</code></blockquote>
+	 *</ul>
+	 */
 	private class SearchNode {
 
 		// A set of possible colors for each node
@@ -19,19 +29,15 @@ public class GraphColor {
 		// cumm[i] = max(max(domain[0]), ..., max(domain[i]))
 		private final int[] cumm;
 
-		/**
-		 * Instantiate a new search node, breaking symmetry with lexical
-		 * ordering and setting color[0] = 0;
-		 */
+		/** Instantiate a new search node. */
 		public SearchNode() {
 			domain = new BitSet[V];
 			cumm = new int[V];
 			for (int i = 0; i < V; i++) {
 				domain[i] = new BitSet(V);
-				domain[i].set(0, i + 1); // Second arg of set() is exclusive
+				domain[i].set(0, V); // Second arg of set() is exclusive
 				cumm[i] = -1;
 			}
-			setColor(0, 0, true);
 		}
 
 		/** Copy constructor */
@@ -39,39 +45,6 @@ public class GraphColor {
 			domain = new BitSet[V];
 			for (int i = 0; i < V; i++)
 				domain[i] = old.domain[i].clone();
-		}
-
-		/**
-		 * Set vertex v to color. If set is false, skip setting the
-		 * domain. Return false when this operation caused an infeasible
-		 * solution.
-		 */
-		public boolean setColor(int v, int color, boolean set) {
-			assert v >= 0 && color >= 0 && v < V && color < V;
-			assert domain[v].get(color); // Color is in v's domain
-			assert feasible(v, color); // Color obeys v's edge constraints
-			assert v == 0 || color <= cumm[v - 1] + 1; // Symmetry constraint
-			assert v == 0 || color <= cumm[v]; // Consequence of the above
-
-			BitSet vset = domain[v];
-			if (set) {
-				vset.clear();
-				vset.set(color);
-				if (v == 0)
-					cumm[v] = color;
-				else if (color < cumm[v])
-					cumm[v] = Math.max(color, cumm[v - 1]);
-				for (int w = v + 1; w < V; w++)
-					cumm[w] = Math.max(cumm[w - 1], domain[w].length() - 1);
-			}
-
-			assert domain[v].cardinality() == 1 && domain[v].get(color);
-			// Propogate the change in the symmetry breaking constraint
-//			for (int w = v + 1; w < V; w++)
-//	            if (!ruleOut(w, getMax(w)));
-			// Edge constraint
-			for (int w : g.adj(v))
-				ruleOut(w, color)
 		}
 
 		/** Return true if setting node v to color obeys the edge constraint. */
@@ -82,33 +55,98 @@ public class GraphColor {
 			return true;
 		}
 
-		/** Rule out that a vertex has a color. Return the color of v or -1. */
-		private boolean ruleOut(int v, int color) {
+		/**
+		 * Return a lower bound the maximum color used based on relaxing
+		 * constraints.
+		 */
+		public int bound() {
+			int max = -1;
+			for (int v = 0; v < V; v++)
+				if (domain[v].cardinality() == 1)
+					max = Math.max(domain[v].nextSetBit(0), max);
+			return max;
+		}
+
+		/**
+		 * Test whether we've found a color for every node. 1 indicates
+		 * success. 0 indicates that the search is not over. -1 indicates
+		 * infeasibility.
+		 */
+		public int solved() {
+			int card;
+			for (int v = 0; v < V; v++) {
+				card = domain[v].cardinality();
+				if (card == 0)
+					return -1;
+				else if (card > 1)
+					return 0;
+			}
+			return 1;
+		}
+
+		/**
+		 * Add the constraint that vertex <code>v</code> is a given color.
+		 *
+		 * @return <code>false</code> if such a constraint causes
+		 * the solution to become infeasible.
+		 */
+		public boolean setColor(int v, int color) {
+			boolean success;
+
 			assert v >= 0 && color >= 0 && v < V && color < V;
+			assert domain[v].get(color); // Color is in v's domain
+			assert feasible(v, color); // Color obeys v's edge constraints
+			assert v == 0 || color <= cumm[v - 1] + 1; // Symmetry constraint
+			assert v == 0 || color <= cumm[v]; // Consequence of the above
 
-			BitSet vset = domain[v];
+			if (color == 0)
+				success = ruleOut(v, color + 1, V);
+			else if (color == V - 1)
+				success = ruleOut(v, 0, V - 1);
+			else
+				success = ruleOut(v, 0, color) && ruleOut(v, color + 1, V);
+			assert domain[v].cardinality() == 1 && domain[v].get(color);
+			return success;
+		}
+
+		/**
+		 * Rule out that a vertex <code>v</code> has any color from
+		 * <code>fromColor</code> (inclusive) to <code>toColor</code>
+		 * (exclusive).
+		 *
+		 * @return <code>false</code> if such a constraint causes
+		 * the solution to become infeasible.
+		 */
+		private boolean ruleOut(int v, int fromColor, int toColor) {
 			int newMax;
+			assert v >= 0 && fromColor >= 0 && toColor > fromColor &&
+				v < V && toColor <= V;
 
-			vset.clear(color);
-			newMax = vset.length() - 1;
+			domain[v].clear(fromColor, toColor);
+			newMax = domain[v].length() - 1;
+			assert v == 0 || newMax <= cumm[v - 1] + 1;
 
-			if (vset.cardinality() == 1)
-				return setColor(v, vset.nextSetBit(0), false);
-			else if (newMax < 0) // We found an infeasible arrangement
+			if (newMax < 0) // domain[v] is empty: constraint is infeasible.
 				return false;
-			else if (newMax < cumm[v]) {
-				// Propogate the change in the symmetry breaking constraint
-				assert newMax >= 0 && newMax <= cumm[v - 1] + 1;
+			else if (domain[v].cardinality() == 1) // newMax is v's color now.
+				for (int w: g.adj(v)) // Enforce edge constraint.
+					if (!ruleOut(w, newMax, newMax + 1))
+						return false;
+			// The condition below ensures that cumm[v] will go down, meaning
+			// that a new constraint may be propogated. Note that when
+			// cumm[v] > cumm[v - 1], cumm[v] equals v's old max before the call
+			// to clear above. Thus v's old max was the binding constraint
+			// preventing cumm[v + 1] from being lower than it is.
+			if ((v == 0 || cumm[v] > cumm[v - 1]) && cumm[v] > newMax) {
 				if (v == 0)
-					cumm[v] = newMax;
+					cumm[v] = color;
 				else
-					for (int w = v; w < V; w++)
-						cumm[w] = Math.max(cumm[w - 1], domain[w].length() - 1);
+					cumm[v] = cumm[v - 1] > newMax ? cumm[v - 1] : newMax;
+				if (v < V - 1)
+					return ruleOut(v + 1, cumm[v] + 2, V);
 			}
 			return true;
 		}
-
-
 	}
 
 	private int[] solve() {
