@@ -68,20 +68,17 @@ public class GraphColor {
 		}
 
 		/**
-		 * Test whether we've found a color for every node. 1 indicates
-		 * success. 0 indicates that the search is not over. -1 indicates
-		 * infeasibility.
+		 * Return an array of the colors found or null if the solution is either
+		 * infeasible or not yet found.
 		 */
-		public int solved() {
-			int card;
-			for (int v = 0; v < V; v++) {
-				card = domain[v].cardinality();
-				if (card == 0)
-					return -1;
-				else if (card > 1)
-					return 0;
-			}
-			return 1;
+		public int[] solution() {
+			for (int v = 0; v < V; v++)
+				if (domain[v].cardinality() != 1)
+					return null;
+			int[] color = new int[V]; // Don't allocate memory until we have to.
+			for (int v = 0; v < V; v++)
+				color[v] = domain[v].nextSetBit(0);
+			return color;
 		}
 
 		/**
