@@ -1,3 +1,4 @@
+import edu.princeton.cs.algs4.Graph;
 import java.util.Comparator;
 import java.util.Arrays;
 
@@ -26,7 +27,7 @@ public class DegreeSortedGraph extends Graph {
 		}
 	}
 
-	private class DegreeOrder implements Comparator<Integer> {
+	private static class DegreeOrder implements Comparator<Integer> {
 
 		private final int[] degree;
 
