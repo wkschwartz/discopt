@@ -144,10 +144,14 @@ public class GraphColor {
 		 * the solution to become infeasible.
 		 */
 		private boolean ruleOut(int v, int fromColor, int toColor) {
-			int newMax;
+			int oldCard, newMax;
 			assert v >= 0 && fromColor >= 0 && toColor > fromColor &&
 				v < V && toColor <= V;
+			assert v == 0 ||
+				cumm[v] == Math.max(cumm[v - 1], domain[v].length() - 1);
 
+			oldCard = domain[v].cardinality();
+			assert oldCard >= 1;
 			domain[v].clear(fromColor, toColor);
 			newMax = domain[v].length() - 1;
 			assert v == 0 || newMax <= cumm[v - 1] + 1;
@@ -156,8 +160,8 @@ public class GraphColor {
 				count = -1;
 				return false;
 			}
-			else if (domain[v].cardinality() == 1) { // newMax is v's color now.
-				count++;
+			else if (oldCard > 1 && domain[v].cardinality() == 1) {
+				count++; // newMax is v's color now.
 				for (int w: g.adj(v)) // Enforce edge constraint.
 					if (!ruleOut(w, newMax, newMax + 1))
 						return false;
@@ -166,8 +170,13 @@ public class GraphColor {
 			// that a new constraint may be propogated. Note that when
 			// cumm[v] > cumm[v - 1], cumm[v] equals v's old max before the call
 			// to clear above. Thus v's old max was the binding constraint
-			// preventing cumm[v + 1] from being lower than it is.
+			// preventing cumm[v + 1] from being lower than it is. Further,
+			// since the conditional requires that domain[v].length() changed,
+			// it won't be true when oldCard == 1 because the only possible
+			// change in that circumstance would cause newMax < 0 and thus the
+			// funciton would have returned false by now.
 			if ((v == 0 || cumm[v] > cumm[v - 1]) && cumm[v] > newMax) {
+				assert oldCard != 1;
 				if (v == 0)
 					cumm[v] = color;
 				else
