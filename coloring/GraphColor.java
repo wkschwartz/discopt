@@ -1,4 +1,5 @@
 import java.util.BitSet;
+import java.util.LinkedList;
 
 public class GraphColor {
 
@@ -9,7 +10,7 @@ public class GraphColor {
 	public GraphColor(Graph g) {
 		this.g = Graph(g); // Defensive copy
 		V = g.V();
-		color = solve();
+		solve();
 	}
 
 	/** Return the color of vertex v, or -1 if no solution exists. */
@@ -110,6 +111,15 @@ public class GraphColor {
 		 */
 		public int maxColor() { return cumm[V - 1]; }
 
+		/** Return iterable of feasible colors for node V greater than color. */
+		public Iterator<Integer> nextColors(int v, int color) {
+			LinkedList<Integer> colors = new LinkedList<Integer>();
+			BitSet dv = domain[v];
+			for (int c=dv.nextSetBit(color + 1); c >= 0; c=dv.nextSetBit(i + 1))
+				colors.add(c);
+			return colors.listIterator();
+		}
+
 		/**
 		 * Add the constraint that vertex <code>v</code> is a given color.
 		 *
@@ -189,22 +199,39 @@ public class GraphColor {
 	}
 
 	private int[] solve() {
-		SeachNode s = new SearchNode(V);
-		// Symmetry constraint: color[start] = 0; further, since we will make
-		// guesses going from low numbered nodes up and from low color numbers
-		// up.
-		return branch(s, 0, 0, V - 1);
+		SeachNode s;
+		// Symmetry constraint: color[start] = 0
+		s = branch(new SearchNode(V), 0, 0, V - 1);
+		if (s != null)
+			color = s.solution();
+		else {
+			color = new int[V];
+			for (int v = 0; v < V; v++)
+				color[v] = -1;
+		}
 	}
 
 	/** Branch and bound. */
-	private int[] branch(SearchNode s, int v, int color, int best) {
-		int[] color;
-		if (!s.setColor(v, color) || s.bound() > best) // short circuit
+	private SearchNode branch(SearchNode s, int v, int color, SearchNode best) {
+		SearchNode newBest, nextTry;
+		assert s != null && v >= 0 && color >= color && v < V && color < V;
+		if (!s.setColor(v, color))
 			return null;
-		if ((color = s.solution()) != null)
-			return color;
-		// Now must make a guess for each node w in range(v + 1, V) and each
-		// color c in domain of w. Will likely have to add methods to SearchNode
-		// for this.
+		if (best != null && s.bound() > best.maxColor())
+			return best;
+		if (best == null || s.maxColor() < best.maxColor())
+			newBest = s;
+		else
+			newBest = best;
+		if (!newBest.solved()) {
+			for (int w = v; w < V; w++) {
+				for(int nextColor : s.nextColors(w, color)) {
+					nextTry = branch(new SearchNode(s), w, nextColor, newBest);
+					if (nextTry.maxColor() < newBest.maxColor())
+						newBest = nextTry;
+				}
+			}
+		}
+		return newBest;
 	}
 }
