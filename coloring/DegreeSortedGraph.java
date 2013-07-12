@@ -3,13 +3,13 @@ import java.util.Arrays;
 
 public class DegreeSortedGraph extends Graph {
 
-	private final Integer[] order;
+	private final int[] reverse;
 
 	public DegreeSortedGraph(Graph g) {
 		super(g.V());
 		int count;
 		int[] degree = new int[g.V()];
-		order = new Integer[g.V()];
+		Integer[] order = new Integer[g.V()];
 		for (int v = 0; v < g.V(); v++) {
 			count = 0;
 			order[v] = v;
@@ -18,9 +18,12 @@ public class DegreeSortedGraph extends Graph {
 			degree[v] = count;
 		}
 		Arrays.sort(order, new DegreeOrder(degree));
-		for (int i = 0; i < g.V(); i++)
+		reverse = new int[g.V()];
+		for (int i = 0; i < g.V(); i++) {
 			for (int w : g.adj(order[i]))
 				addEdge(order[i], order[w]);
+			reverse[order[i]] = i;
+		}
 	}
 
 	private class DegreeOrder implements Comparator<Integer> {
@@ -42,10 +45,5 @@ public class DegreeSortedGraph extends Graph {
 	}
 
 	/** Return the original name of ordered vertex <code>v</code>. */
-	public int reverse(int v) {
-		for (int i = 0; i < order.length; i++)
-			if (order[i] == v)
-				return i;
-		throw new ArrayIndexOutOfBoundsException();
-	}
+	public int reverse(int v) { return reverse[v]; }
 }
