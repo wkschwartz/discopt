@@ -1,5 +1,7 @@
+import java.util.Scanner;
 import java.util.BitSet;
 import java.util.LinkedList;
+import java.io.IOException;
 import edu.princeton.cs.algs4.Graph;
 
 public class GraphColor {
@@ -239,5 +241,49 @@ public class GraphColor {
 			}
 		}
 		return newBest;
+	}
+
+	/**
+	 * Return a string represenation of the solution.
+	 * <p>
+	 * The first line is the optimal objective value, a space, and 1 if the
+	 * soluiton is optimal and 0 if it isn't. The next line is a space separated
+	 * list of integers representing the colors of the input nodes.
+	 */
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(maxColor());
+		sb.append(' ');
+		sb.append(optimal() ? 1 : 0);
+		sb.append(System.getProperty("line.separator"));
+		for (int v = 0; v < V; v++) {
+			sb.append(color(v));
+			if (v < V - 1)
+				sb.append(' ');
+		}
+		return sb.toString();
+	}
+
+	/**
+	 * Read a graph from stdin and write the solution to stdout.
+	 * <p>
+	 * The graph should be written with the first line giving the number of
+	 * vertices, a space, and the number of edges. Each subsequent line should
+	 * describe an edge by giving the adjoined vertices' indices separated by a
+	 * space.
+	 */
+	public static void main(String[] args) throws IOException {
+		if (args.length > 0) {
+			System.err.println("unkown arguments found; pass data in on stdin");
+			System.exit(1);
+		}
+		Scanner s = new Scanner(System.in, "UTF-8");
+		Graph g = new Graph(s.nextInt());
+		int E = s.nextInt();
+		while (s.hasNextInt())
+			g.addEdge(s.nextInt(), s.nextInt());
+		if (E != g.E())
+			throw new IOException("Found "+g.E()+" of "+E+" expected edges.");
+		System.out.println(new GraphColor(g).toString());
 	}
 }
