@@ -9,7 +9,7 @@ public class GraphColor {
 	private final int[] colors;
 
 	public GraphColor(Graph g) {
-		this.g = Graph(g); // Defensive copy
+		this.g = new Graph(g); // Defensive copy
 		V = g.V();
 		solve();
 	}
