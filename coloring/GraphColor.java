@@ -5,7 +5,7 @@ public class GraphColor {
 
 	private final Graph g;
 	private final int V;
-	private final int[] color;
+	private final int[] colors;
 
 	public GraphColor(Graph g) {
 		this.g = Graph(g); // Defensive copy
@@ -14,7 +14,7 @@ public class GraphColor {
 	}
 
 	/** Return the color of vertex v, or -1 if no solution exists. */
-	public int color(int v) { return color[v]; }
+	public int color(int v) { return colors[v]; }
 
 	/** Return the maximum color used */
 	public int maxColor() {
@@ -93,17 +93,16 @@ public class GraphColor {
 		public boolean solved() { return count == V; }
 
 		/**
-		 * Return an array of the colors found or null if the solution is either
+		 * Copy to given array the colors found or -1s if the solution is either
 		 * infeasible or not yet found.
 		 */
-		public int[] solution() {
-			int[] color;
-			if (!solved())
-				return null;
-			color = new int[V];
-			for (int v = 0; v < V; v++)
-				color[v] = domain[v].nextSetBit(0);
-			return color;
+		public void solution(int[] a) {
+			if (solved())
+				for (int v = 0; v < V; v++)
+					a[v] = -1;
+			else
+				for (int v = 0; v < V; v++)
+					a[v] = domain[v].nextSetBit(0);
 		}
 
 		/**
@@ -113,11 +112,11 @@ public class GraphColor {
 
 		/** Return iterable of feasible colors for node V greater than color. */
 		public Iterator<Integer> nextColors(int v, int color) {
-			LinkedList<Integer> colors = new LinkedList<Integer>();
+			LinkedList<Integer> cs = new LinkedList<Integer>();
 			BitSet dv = domain[v];
-			for (int c=dv.nextSetBit(color + 1); c >= 0; c=dv.nextSetBit(i + 1))
-				colors.add(c);
-			return colors.listIterator();
+			for (int c=dv.nextSetBit(color + 1); c >= 0; c=dv.nextSetBit(c + 1))
+				cs.add(c);
+			return cs.listIterator();
 		}
 
 		/**
@@ -203,11 +202,10 @@ public class GraphColor {
 		// Symmetry constraint: color[start] = 0
 		s = branch(new SearchNode(V), 0, 0, V - 1);
 		if (s != null)
-			color = s.solution();
+			s.solution(colors);
 		else {
-			color = new int[V];
 			for (int v = 0; v < V; v++)
-				color[v] = -1;
+				colors[v] = -1;
 		}
 	}
 
