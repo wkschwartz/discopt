@@ -1,5 +1,6 @@
 import java.util.BitSet;
 import java.util.LinkedList;
+import edu.princeton.cs.algs4.Graph;
 
 public class GraphColor {
 
@@ -25,7 +26,7 @@ public class GraphColor {
 	}
 
 	/** Return whether the algorithm proved optimality. */
-	return boolean optimal() {
+	public boolean optimal() {
 		return color(0) >= 0; // Only reason for non-optimality is infeasibility
 	}
 
@@ -64,7 +65,7 @@ public class GraphColor {
 		public SearchNode(SearchNode old) {
 			domain = new BitSet[V];
 			for (int i = 0; i < V; i++)
-				domain[i] = old.domain[i].clone();
+				domain[i] = (BitSet) old.domain[i].clone();
 		}
 
 		/** Return true if setting node v to color obeys the edge constraint. */
@@ -111,12 +112,12 @@ public class GraphColor {
 		public int maxColor() { return cumm[V - 1]; }
 
 		/** Return iterable of feasible colors for node V greater than color. */
-		public Iterator<Integer> nextColors(int v, int color) {
+		public Iterable<Integer> nextColors(int v, int color) {
 			LinkedList<Integer> cs = new LinkedList<Integer>();
 			BitSet dv = domain[v];
 			for (int c=dv.nextSetBit(color + 1); c >= 0; c=dv.nextSetBit(c + 1))
 				cs.add(c);
-			return cs.listIterator();
+			return cs;
 		}
 
 		/**
@@ -187,7 +188,7 @@ public class GraphColor {
 			if ((v == 0 || cumm[v] > cumm[v - 1]) && cumm[v] > newMax) {
 				assert oldCard != 1;
 				if (v == 0)
-					cumm[v] = color;
+					cumm[v] = newMax;
 				else
 					cumm[v] = cumm[v - 1] > newMax ? cumm[v - 1] : newMax;
 				if (v < V - 1)
@@ -198,9 +199,9 @@ public class GraphColor {
 	}
 
 	private int[] solve() {
-		SeachNode s;
+		SearchNode s;
 		// Symmetry constraint: color[start] = 0
-		s = branch(new SearchNode(V), 0, 0, V - 1);
+		s = branch(new SearchNode(), 0, 0, null);
 		if (s != null)
 			s.solution(colors);
 		else {
