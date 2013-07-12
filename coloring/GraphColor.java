@@ -11,7 +11,7 @@ public class GraphColor {
 	public GraphColor(Graph g) {
 		this.g = new Graph(g); // Defensive copy
 		V = g.V();
-		solve();
+		colors = solve();
 	}
 
 	/** Return the color of vertex v, or -1 if no solution exists. */
@@ -97,16 +97,18 @@ public class GraphColor {
 		public boolean solved() { return count == V; }
 
 		/**
-		 * Copy to given array the colors found or -1s if the solution is either
+		 * Return array of the colors found or -1s if the solution is either
 		 * infeasible or not yet found.
 		 */
-		public void solution(int[] a) {
+		public int[] solution() {
+			int[] a = new int[V];
 			if (solved())
 				for (int v = 0; v < V; v++)
-					a[v] = -1;
+					a[v] = domain[v].nextSetBit(0);
 			else
 				for (int v = 0; v < V; v++)
-					a[v] = domain[v].nextSetBit(0);
+					a[v] = -1;
+			return a;
 		}
 
 		/**
@@ -206,10 +208,12 @@ public class GraphColor {
 		// Symmetry constraint: color[start] = 0
 		s = branch(new SearchNode(), 0, 0, null);
 		if (s != null)
-			s.solution(colors);
+			return s.solution();
 		else {
+			int[] cs = new int[V];
 			for (int v = 0; v < V; v++)
-				colors[v] = -1;
+				cs[v] = -1;
+			return cs;
 		}
 	}
 
