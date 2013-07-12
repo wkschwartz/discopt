@@ -12,6 +12,22 @@ public class GraphColor {
 		color = solve();
 	}
 
+	/** Return the color of vertex v, or -1 if no solution exists. */
+	public int color(int v) { return color[v]; }
+
+	/** Return the maximum color used */
+	public int maxColor() {
+		int max = -1;
+		for (int v = 0; v < V; v++)
+			max = Math.max(max, color(v));
+		return max;
+	}
+
+	/** Return whether the algorithm proved optimality. */
+	return boolean optimal() {
+		return color(0) >= 0; // Only reason for non-optimality is infeasibility
+	}
+
 	/**
 	 * Logical deductions from constraints added via setColor().
 	 * <p>
