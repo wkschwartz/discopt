@@ -161,14 +161,12 @@ public class GraphColor {
 		 * the solution to become infeasible.
 		 */
 		private boolean ruleOut(int v, int fromColor, int toColor) {
-			int oldCard, newMax;
+			int oldCard = domain[v].cardinality(), newMax;
 			assert v >= 0 && fromColor >= 0 && toColor > fromColor &&
 				v < V && toColor <= V;
-			assert v == 0 ||
-				cumm[v] == Math.max(cumm[v - 1], domain[v].length() - 1);
-
-			oldCard = domain[v].cardinality();
+			assert v == 0 || cumm[v] ==Math.max(cumm[v-1],domain[v].length()-1);
 			assert oldCard >= 1;
+
 			domain[v].clear(fromColor, toColor);
 			newMax = domain[v].length() - 1;
 			assert v == 0 || newMax <= cumm[v - 1] + 1;
