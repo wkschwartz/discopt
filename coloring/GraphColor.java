@@ -51,7 +51,7 @@ public class GraphColor {
 		}
 
 		/** Return true if setting node v to color obeys the edge constraint. */
-		private boolean feasible(int v, int color) {
+		private boolean edgeConstrained(int v, int color) {
 			for (int w : g.adj(v))
 				if (domain[w].cardinality() == 1 && domain[w].get(color))
 					return false;
@@ -105,7 +105,7 @@ public class GraphColor {
 
 			assert v >= 0 && color >= 0 && v < V && color < V;
 			assert domain[v].get(color); // Color is in v's domain
-			assert feasible(v, color); // Color obeys v's edge constraints
+			assert edgeConstrained(v, color); //Color obeys v's edge constraints
 			assert v == 0 || color <= cumm[v - 1] + 1; // Symmetry constraint
 			assert v == 0 || color <= cumm[v]; // Consequence of the above
 
