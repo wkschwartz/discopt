@@ -64,6 +64,9 @@ public class GraphColor {
 		/** Copy constructor */
 		public SearchNode(SearchNode old) {
 			domain = new BitSet[V];
+			cumm = new int[V];
+			count = old.count;
+			System.arraycopy(old.cumm, 0, cumm, 0, V);
 			for (int i = 0; i < V; i++)
 				domain[i] = (BitSet) old.domain[i].clone();
 		}
