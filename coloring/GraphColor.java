@@ -175,12 +175,6 @@ public class GraphColor {
 				count = -1;
 				return false;
 			}
-			else if (oldCard > 1 && domain[v].cardinality() == 1) {
-				count++; // newMax is v's color now.
-				for (int w: g.adj(v)) // Enforce edge constraint.
-					if (!ruleOut(w, newMax, newMax + 1))
-						return false;
-			}
 			// The condition below ensures that cumm[v] will go down, meaning
 			// that a new constraint may be propogated. Note that when
 			// cumm[v] > cumm[v - 1], cumm[v] equals v's old max before the call
@@ -198,6 +192,13 @@ public class GraphColor {
 					cumm[v] = cumm[v - 1] > newMax ? cumm[v - 1] : newMax;
 				if (v < V - 1)
 					return ruleOut(v + 1, cumm[v] + 2, V);
+			} // Must enforce cumm invariant before more calls to ruleOut
+			if (oldCard > 1 && domain[v].cardinality() == 1) {
+				assert newMax >= 0;
+				count++; // newMax is v's color now.
+				for (int w: g.adj(v)) // Enforce edge constraint.
+					if (!ruleOut(w, newMax, newMax + 1))
+						return false;
 			}
 			return true;
 		}
