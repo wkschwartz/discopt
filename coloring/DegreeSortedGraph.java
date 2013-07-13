@@ -20,10 +20,11 @@ public class DegreeSortedGraph extends Graph {
 		}
 		Arrays.sort(order, new DegreeOrder(degree));
 		reverse = new int[g.V()];
-		for (int i = 0; i < g.V(); i++) {
-			for (int w : g.adj(order[i]))
-				addEdge(order[i], order[w]);
-			reverse[order[i]] = i;
+		for (int v = 0; v < g.V(); v++) {
+			for (int w : g.adj(v))
+				if (v < w)
+					addEdge(order[v], order[w]);
+			reverse[order[v]] = v;
 		}
 	}
 
