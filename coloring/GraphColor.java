@@ -180,14 +180,11 @@ public class GraphColor {
 			}
 			// Reestablish the invariant defining cumm[] before any more
 			// recursive calls, and propogate the symmetry breaking constraint
-			// cumm[] is for. Suppose oldMax was the max feasible color for node
-			// v before the call to clear above. Then these constraints are
-			// already true at this line of code, if oldMax was less than
-			// cumm[v-1], i.e., if cumm[v] = cumm[v-1] >= oldMax or if newMax ==
-			// oldMax. I.e., we only need to propogate these constraints if
-			// oldMax was the binding constraint on cumm[v+1].
-			if ((v == 0 || cumm[v] > cumm[v - 1]) && cumm[v] > newMax) {
-				assert oldCard != 1;
+			// cumm[] is for. The conditional below allows propogation when the
+			// binding constraint on cumm[v+1] falls: either if v's max fell or
+			// if cumm[v-1] fell.
+			if ((v == 0 || cumm[v] >  cumm[v - 1]) && cumm[v]     > newMax ||
+				v > 0 && v < V-1 && cumm[v] == cumm[v-1] && cumm[v+1] > cumm[v-1] + 1) {
 				cumm[v] = v == 0 ? newMax : Math.max(cumm[v - 1], newMax);
 				if (v < V - 1) {
 					cumm[v + 1] = Math.max(cumm[v], domain[v + 1].length() - 1);
