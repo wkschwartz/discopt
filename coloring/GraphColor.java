@@ -46,7 +46,7 @@ public class GraphColor {
 
 		// A set of possible colors for each node
 		private final BitSet[] domain;
-		// cumm[i] = max(max(domain[0]), ..., max(domain[i]))
+		// cumulative maximum: cumm[i] = max(max(domain[0]), ..., max(domain[i]))
 		private final int[] cumm;
 		// count of solved nodes. -1 when infeasible.
 		private int count;
@@ -58,7 +58,7 @@ public class GraphColor {
 			for (int i = 0; i < V; i++) {
 				domain[i] = new BitSet(V);
 				domain[i].set(0, V); // Second arg of set() is exclusive
-				cumm[i] = -1;
+				cumm[i] = V - 1;
 			}
 			count = 0;
 		}
@@ -175,28 +175,29 @@ public class GraphColor {
 				count = -1;
 				return false;
 			}
-			// The condition below ensures that cumm[v] will go down, meaning
-			// that a new constraint may be propogated. Note that when
-			// cumm[v] > cumm[v - 1], cumm[v] equals v's old max before the call
-			// to clear above. Thus v's old max was the binding constraint
-			// preventing cumm[v + 1] from being lower than it is. Further,
-			// since the conditional requires that domain[v].length() changed,
-			// it won't be true when oldCard == 1 because the only possible
-			// change in that circumstance would cause newMax < 0 and thus the
-			// funciton would have returned false by now.
+			// Reestablish the invariant defining cumm[] before any more
+			// recursive calls, and propogate the symmetry breaking constraint
+			// cumm[] is for. Suppose oldMax was the max feasible color for node
+			// v before the call to clear above. Then these constraints are
+			// already true at this line of code, if oldMax was less than
+			// cumm[v-1], i.e., if cumm[v] = cumm[v-1] >= oldMax or if newMax ==
+			// oldMax. I.e., we only need to propogate these constraints if
+			// oldMax was the binding constraint on cumm[v+1].
 			if ((v == 0 || cumm[v] > cumm[v - 1]) && cumm[v] > newMax) {
 				assert oldCard != 1;
-				if (v == 0)
-					cumm[v] = newMax;
-				else
-					cumm[v] = cumm[v - 1] > newMax ? cumm[v - 1] : newMax;
-				if (v < V - 1)
-					return ruleOut(v + 1, cumm[v] + 2, V);
-			} // Must enforce cumm invariant before more calls to ruleOut
+				cumm[v] = v == 0 ? newMax : Math.max(cumm[v - 1], newMax);
+				if (v < V - 1) {
+					cumm[v + 1] = Math.max(cumm[v], domain[v + 1].length() - 1);
+					if (cumm[v] + 2 < V && !ruleOut(v + 1, cumm[v] + 2, V))
+						return false;
+				}
+			}
+			// Propogate the edge constraint now that v has become the color
+			// newMax
 			if (oldCard > 1 && domain[v].cardinality() == 1) {
 				assert newMax >= 0;
 				count++; // newMax is v's color now.
-				for (int w: g.adj(v)) // Enforce edge constraint.
+				for (int w: g.adj(v))
 					if (!ruleOut(w, newMax, newMax + 1))
 						return false;
 			}
