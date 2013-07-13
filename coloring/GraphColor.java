@@ -175,6 +175,7 @@ public class GraphColor {
 		 */
 		private boolean ruleOut(int v, int fromColor, int toColor) {
 			int oldCard = domain[v].cardinality(), newMax;
+			boolean vFell, v_1Fell;
 			assert v >= 0 && fromColor >= 0 && toColor > fromColor &&
 				v < V && toColor <= V;
 			assert oldCard >= 1;
@@ -192,8 +193,10 @@ public class GraphColor {
 			// cumm[] is for. The conditional below allows propogation when the
 			// binding constraint on cumm[v+1] falls: either if v's max fell or
 			// if cumm[v-1] fell.
-			if ((v == 0 || cumm[v] >  cumm[v - 1]) && cumm[v]     > newMax ||
-				v > 0 && v < V-1 && cumm[v] == cumm[v-1] && cumm[v+1] > cumm[v-1] + 1) {
+			vFell = (v == 0 || cumm[v] > cumm[v - 1]) && cumm[v] > newMax;
+			v_1Fell = v > 0 && v < V - 1 && cumm[v] == cumm[v - 1] &&
+				cumm[v + 1] > cumm[v - 1] + 1;
+			if (vFell || v_1Fell) {
 				cumm[v] = v == 0 ? newMax : Math.max(cumm[v - 1], newMax);
 				if (v < V - 1) {
 					if (cumm[v] + 2 < V && !ruleOut(v + 1, cumm[v] + 2, V))
