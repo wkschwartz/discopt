@@ -14,6 +14,16 @@ public class GraphColor {
 		this.g = new Graph(g); // Defensive copy
 		V = g.V();
 		colors = solve();
+		assert feasible();
+	}
+
+	/** Return true if colors obeys g's edge constraints. */
+	private boolean feasible() {
+		for (int v = 0; v < V; v++)
+			for (int w : g.adj(v))
+				if (colors[v] == colors[w])
+					return false;
+		return true;
 	}
 
 	/** Return the color of vertex v, or -1 if no solution exists. */
