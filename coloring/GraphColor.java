@@ -177,7 +177,6 @@ public class GraphColor {
 			int oldCard = domain[v].cardinality(), newMax;
 			assert v >= 0 && fromColor >= 0 && toColor > fromColor &&
 				v < V && toColor <= V;
-			assert v == 0 || cumm[v] ==Math.max(cumm[v-1],domain[v].length()-1);
 			assert oldCard >= 1;
 
 			domain[v].clear(fromColor, toColor);
@@ -197,11 +196,11 @@ public class GraphColor {
 				v > 0 && v < V-1 && cumm[v] == cumm[v-1] && cumm[v+1] > cumm[v-1] + 1) {
 				cumm[v] = v == 0 ? newMax : Math.max(cumm[v - 1], newMax);
 				if (v < V - 1) {
-					cumm[v + 1] = Math.max(cumm[v], domain[v + 1].length() - 1);
 					if (cumm[v] + 2 < V && !ruleOut(v + 1, cumm[v] + 2, V))
 						return false;
 				}
 			}
+			assert v == 0 || cumm[v] == Math.max(cumm[v - 1], domain[v].length() - 1);
 			// Propogate the edge constraint now that v has become the color
 			// newMax
 			if (oldCard > 1 && domain[v].cardinality() == 1) {
