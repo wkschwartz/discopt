@@ -118,12 +118,15 @@ public class GraphColor {
 		 */
 		public int maxColor() { return cumm[V - 1]; }
 
-		/** Return iterable of feasible colors for node V greater than color. */
-		public Iterable<Integer> nextColors(int v, int color) {
+		/** Return iterable of feasible colors less than max for node v if it
+		 * doesn't have a color already.
+		 */
+		public Iterable<Integer> nextColors(int v, int max) {
 			LinkedList<Integer> cs = new LinkedList<Integer>();
 			BitSet dv = domain[v];
-			for (int c=dv.nextSetBit(color + 1); c >= 0; c=dv.nextSetBit(c + 1))
-				cs.add(c);
+			if (dv.cardinality() > 1)
+				for (int c=dv.nextSetBit(0);c>=0 && c< max;c=dv.nextSetBit(c+1))
+					cs.add(c);
 			return cs;
 		}
 
@@ -233,7 +236,7 @@ public class GraphColor {
 			newBest = best;
 		if (!newBest.solved()) {
 			for (int w = v; w < V; w++) {
-				for(int nextColor : s.nextColors(w, color)) {
+				for(int nextColor : s.nextColors(w, newBest.maxColor())) {
 					nextTry = branch(new SearchNode(s), w, nextColor, newBest);
 					if (nextTry.maxColor() < newBest.maxColor())
 						newBest = nextTry;
