@@ -223,6 +223,7 @@ public class GraphColor {
 	private SearchNode branch(SearchNode s, int v, int color, SearchNode best) {
 		SearchNode newBest, nextTry;
 		assert s != null && v >= 0 && color >= 0 && v < V && color < V;
+		assert best != null || v == 0 && color == 0; // best only null if first call.
 		if (!s.setColor(v, color))
 			return null;
 		if (best != null && s.bound() > best.maxColor())
@@ -235,7 +236,7 @@ public class GraphColor {
 			for (int w = v; w < V; w++) {
 				for(int nextColor : s.nextColors(w, newBest.maxColor())) {
 					nextTry = branch(new SearchNode(s), w, nextColor, newBest);
-					if (nextTry.maxColor() < newBest.maxColor())
+					if (nextTry != null && nextTry.maxColor() < newBest.maxColor())
 						newBest = nextTry;
 				}
 			}
