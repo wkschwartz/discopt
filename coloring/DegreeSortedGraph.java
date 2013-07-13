@@ -37,11 +37,11 @@ public class DegreeSortedGraph extends Graph {
 
 		public int compare(Integer a, Integer b) {
 			if (degree[a] > degree[b])
-				return 1;
+				return -1;
 			else if (degree[a] == degree[b])
 				return 0;
 			else
-				return -1;
+				return 1;
 		}
 	}
 
