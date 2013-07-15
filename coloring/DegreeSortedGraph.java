@@ -1,3 +1,5 @@
+package gc;
+
 import edu.princeton.cs.algs4.Graph;
 import java.util.Comparator;
 import java.util.Arrays;
