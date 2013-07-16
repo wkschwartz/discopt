@@ -163,7 +163,8 @@ public class GraphColor {
 				success = ruleOut(v, 0, V - 1);
 			else
 				success = ruleOut(v, 0, color) && ruleOut(v, color + 1, V);
-			assert domain[v].cardinality() == 1 && domain[v].get(color);
+			assert !success || domain[v].cardinality() == 1 && domain[v].get(color) :
+			"v=" + v + ", color=" + color + " domain=" + domain[v].toString();
 			return success;
 		}
 
