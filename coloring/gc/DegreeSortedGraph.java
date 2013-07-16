@@ -17,7 +17,7 @@ import java.util.Arrays;
  */
 public class DegreeSortedGraph extends Graph {
 
-	private final int[] reverse;
+	private final int[] g2dsg;
 
 	public DegreeSortedGraph(Graph g) {
 		super(g.V());
@@ -32,13 +32,13 @@ public class DegreeSortedGraph extends Graph {
 			degree[v] = count;
 		}
 		Arrays.sort(order, new DegreeOrder(degree));
-		reverse = new int[g.V()];
-		for (int v = 0; v < g.V(); v++) {
+		g2dsg = new int[g.V()];
+		for (int v = 0; v < g.V(); v++)
+			g2dsg[order[v]] = v;
+		for (int v = 0; v < g.V(); v++)
 			for (int w : g.adj(v))
 				if (v < w)
-					addEdge(order[v], order[w]);
-			reverse[order[v]] = v;
-		}
+					addEdge(g2dsg(v), g2dsg(w));
 	}
 
 	private static class DegreeOrder implements Comparator<Integer> {
@@ -59,6 +59,7 @@ public class DegreeSortedGraph extends Graph {
 		}
 	}
 
-	/** Return the original name of ordered vertex <code>v</code>. */
-	public int reverse(int v) { return reverse[v]; }
+	/** Return the new name of the input graph's vertex <code>v</code>. */
+	public int g2dsg(int v) { return g2dsg[v]; }
+
 }
