@@ -8,12 +8,12 @@ import edu.princeton.cs.algs4.Graph;
 
 public class GraphColor {
 
-	private final Graph g;
+	private final DegreeSortedGraph g;
 	private final int V;
 	private final int[] colors;
 
 	public GraphColor(Graph g) {
-		this.g = new Graph(g); // Defensive copy
+		this.g = new DegreeSortedGraph(g);
 		V = g.V();
 		colors = solve();
 		assert feasible();
@@ -29,7 +29,7 @@ public class GraphColor {
 	}
 
 	/** Return the color of vertex v, or -1 if no solution exists. */
-	public int color(int v) { return colors[v]; }
+	public int color(int v) { return colors[g.g2dsg(v)]; }
 
 	/** Return the maximum color used */
 	public int maxColor() {
