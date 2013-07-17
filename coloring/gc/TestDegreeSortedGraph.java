@@ -44,14 +44,15 @@ public class TestDegreeSortedGraph {
 	}
 
 	@Test
-	public void reverseMapsDSGtoG() {
+	public void g2dsgMapsGtoDSG() {
 		org.junit.Assert.assertEquals(g.V(), dsg.V());
 		org.junit.Assert.assertEquals(g.E(), dsg.E());
-		for (int dsgNode = 0; dsgNode < dsg.V(); dsgNode++) {
-			Iterator dsgAdj = dsg.adj(dsgNode).iterator();
-			Iterator gAdj = g.adj(dsg.reverse(dsgNode)).iterator();
+		for (int gNode = 0; gNode < dsg.V(); gNode++) {
+			Iterator<Integer> dsgAdj = dsg.adj(dsg.g2dsg(gNode)).iterator();
+			Iterator<Integer> gAdj = g.adj(gNode).iterator();
 			while (gAdj.hasNext())
-				org.junit.Assert.assertEquals(gAdj.next(), dsg.reverse((int) dsgAdj.next()));
+				org.junit.Assert.assertEquals((int) dsg.g2dsg(gAdj.next()),
+											  (int) dsgAdj.next());
 		}
 	}
 
