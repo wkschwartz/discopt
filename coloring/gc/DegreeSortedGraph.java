@@ -3,6 +3,7 @@ package gc;
 import edu.princeton.cs.algs4.Graph;
 import java.util.Comparator;
 import java.util.Arrays;
+import java.util.Scanner;
 
 
 /**
@@ -62,4 +63,25 @@ public class DegreeSortedGraph extends Graph {
 	/** Return the new name of the input graph's vertex <code>v</code>. */
 	public int g2dsg(int v) { return g2dsg[v]; }
 
+	/** Test client */
+	public static void main(String[] args) {
+		if (args.length > 0) {
+			System.err.println("unkown arguments found; pass data in on stdin");
+			System.exit(1);
+		}
+		Scanner s = new Scanner(System.in, "UTF-8");
+		Graph g = new Graph(s.nextInt());
+		int E = s.nextInt();
+		while (s.hasNextInt())
+			g.addEdge(s.nextInt(), s.nextInt());
+		System.out.println("From original graph:");
+		System.out.println(g.toString());
+		DegreeSortedGraph dg = new DegreeSortedGraph(g);
+		System.out.println("To sorted graph:");
+		System.out.println(dg.toString());
+		System.out.println("from | to");
+		for (int i = 0; i < g.V(); i++)
+			System.out.println(i + "    |  " + dg.g2dsg(i));
+		System.out.println("\nto | from | degree");
+	}
 }
