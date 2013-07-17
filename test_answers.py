@@ -48,6 +48,11 @@ class TestAnswers:
 	EXPECTED_ANSWERS = None # Should be a tuple of answers for each problem
 	DIR = _os.path.join('instructor', 'data') # Location of data files.
 
+	@staticmethod
+	def solve(data):
+		"Replace this in sub classes with the solver.solveIt function."
+		raise NotImplementedError
+
 	@classmethod
 	def tests_available(cls):
 		return range(len(cls.PROBLEMS))
@@ -58,8 +63,6 @@ class TestAnswers:
 		assert len(cls.PROBLEMS) == len(cls.EXPECTED_ANSWERS)
 		assert all(isinstance(i, int) for i in cls.EXPECTED_ANSWERS)
 		assert all(isinstance(t, tuple) and len(t) == 2 for t in cls.PROBLEMS)
-		from solver import solveIt
-		cls.solve = staticmethod(solveIt)
 
 	def __init__(self, *args, test=None, **kwargs):
 		super().__init__(*args, **kwargs)
