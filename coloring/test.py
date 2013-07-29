@@ -11,7 +11,7 @@ class TestColoring(ta.TestAnswers):
 
 	PREFIX = 'gc'
 	PROBLEMS = ((50, 3), (70, 7), (100, 5), (250, 9), (500, 1), (1000, 5))
-	EXPECTED_ANSWERS = (6, 17, 15, 73, 13, 85) # The latter two are wrong
+	EXPECTED_ANSWERS = (6, 17, 15, 73, 12, 85) # The last one is wrong
 
 	@staticmethod
 	def solve(data):
