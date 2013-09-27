@@ -176,7 +176,7 @@ public class GraphColor {
 		 * @return <code>false</code> if such a constraint causes
 		 * the solution to become infeasible.
 		 */
-		private boolean ruleOut(int v, int fromColor, int toColor) {
+		public boolean ruleOut(int v, int fromColor, int toColor) {
 			int oldCard = domain[v].cardinality(), newMax;
 			boolean vFell, v_1Fell;
 			assert v >= 0 && fromColor >= 0 && toColor > fromColor &&
@@ -245,8 +245,15 @@ public class GraphColor {
 			return best;
 		if (best == null || s.maxColor() < best.maxColor())
 			newBest = s;
-		else
+		else {
 			newBest = best;
+			// s no longer needs colors best.maxColor() + 1 and up since if s
+			// can't find a feasible solution that excludes those large colors,
+			// then s can't beat best.
+			for (int w = 0; w < V; w++)
+				if (!s.ruleOut(w, best.maxColor() + 1, V))
+					return null;
+		}
 		if (!newBest.solved()) {
 			for (int w = v; w < V; w++) {
 				for(int nextColor : s.nextColors(w, newBest.maxColor())) {
