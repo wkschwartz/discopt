@@ -108,6 +108,8 @@ public class KColor {
 		private final BitSet[] domains;
 		// The partial coloring being built up. UNSOLVED when not solved yet.
 		private final int[] partial;
+		// Maximum color used so far
+		private int maxColor;
 		// The count of solved nodes. INFEASIBLE when infeasible. V when solved.
 		private int solved;
 		// Search tree depth
@@ -123,6 +125,7 @@ public class KColor {
 			}
 			solved = 0;
 			depth = 0;
+			maxColor = 0;
 		}
 
 		// copy constructor
@@ -134,6 +137,7 @@ public class KColor {
 				domains[i] = (BitSet) old.domains[i].clone();
 			solved = old.solved;
 			depth = old.depth + 1;
+			maxColor = old.maxColor;
 		}
 
 		public int depth() { return depth; }
@@ -160,8 +164,11 @@ public class KColor {
 			LinkedList<Integer> cs = new LinkedList<Integer>();
 			BitSet d = domains[v];
 			if (d.cardinality() > 1)
-				for (int c = d.nextSetBit(0); c >= 0; c = d.nextSetBit(c + 1))
+				for (int c = d.nextSetBit(0); c >= 0 && c <= maxColor; c = d.nextSetBit(c + 1))
 					cs.add(c);
+			int unused = d.nextSetBit(maxColor + 1);
+			if (unused >= 0)
+				cs.add(unused);
 			return cs;
 		}
 
@@ -206,19 +213,34 @@ public class KColor {
 				solved = INFEASIBLE;
 				return false;
 			}
-			// Lexicographical symmetry-breaking constraint
-			if (v < V - 1 && newMax < oldMax)
-				if (!ruleOut(v + 1, newMax + 2, k))
-					return false;
-			// If solved, mark as solved and propogate edge constraint.
-			if (partial[v] == UNSOLVED && domain.cardinality() == 1) {
-//				System.out.printf("Discovered node %d = color %d\n", v, newMax);
-				assert domain.get(newMax);
-				solved++;
-				partial[v] = newMax;
-				for (int w: g.adj(v))
-					if (!ruleOut(w, newMax, newMax + 1))
-						return false;
+			if (partial[v] == UNSOLVED) {
+				int nextColor;
+				assert domain.cardinality() > 0;
+				if (domain.cardinality() == 1) {
+					// If solved, mark as solved and propogate edge constraint.
+//					System.out.printf("Discovered node %d = color %d\n", v, newMax);
+					assert domain.get(newMax);
+					solved++;
+					partial[v] = newMax;
+					if (maxColor < newMax) {
+						// Difference of 1 because of the lexicographical
+						// symmetry breaking below
+						assert newMax - maxColor == 1;
+						maxColor = newMax;
+					}
+					for (int w: g.adj(v))
+						if (!ruleOut(w, newMax, newMax + 1))
+							return false;
+				}
+				else if ((nextColor = domain.nextSetBit(0)) > maxColor) {
+					// Lexicographic symmetry breaking: Since no used color is
+					// left, just take the next unused one.
+					assert domain.cardinality() > 1;
+					// Really we want to call setColor but that doubles the height
+					// of the call stack in the easy cases when this symmetry
+					// breaking constraint solves big chunks of the puzzle.
+					ruleOut(v, nextColor + 1, k);
+				}
 			}
 			return true;
 		}
