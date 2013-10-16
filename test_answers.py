@@ -31,7 +31,7 @@ def load_tests_factory(test_class, test_methods=('test_answer',)):
 	return load_tests
 
 
-class TestAnswers:
+class TestAnswers(object):
 
 	"""
 	Base class for testing the objective function values produced by the
@@ -64,8 +64,8 @@ class TestAnswers:
 		assert all(isinstance(i, int) for i in cls.EXPECTED_ANSWERS)
 		assert all(isinstance(t, tuple) and len(t) == 2 for t in cls.PROBLEMS)
 
-	def __init__(self, *args, test=None, **kwargs):
-		super().__init__(*args, **kwargs)
+	def __init__(self, methodName='runTest', test=None):
+		super(TestAnswers, self).__init__(methodName)
 		if test not in self.tests_available():
 			raise ValueError('unknown test %r' % test)
 		self.test = test
