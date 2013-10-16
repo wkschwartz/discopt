@@ -12,14 +12,14 @@ import choco.cp.model.CPModel;
 import choco.kernel.model.constraints.Constraint;
 import choco.kernel.model.variables.integer.IntegerVariable;
 
-public class GraphColoring {
+public class ChocoGC {
 	private static final int TIME_LIMIT = 10 * 1000; // 10 seconds
 
 	private final Graph g;
 	private final CPSolver s;
 	private final IntegerVariable[] nodes;
 
-	public GraphColoring(Graph g) {
+	public ChocoGC(Graph g) {
 		g = new Graph(g); // defensive copy
 		CPModel m = new CPModel();
 
