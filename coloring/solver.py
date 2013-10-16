@@ -18,4 +18,4 @@ class Solution(base_solver.JavaSolution):
 solveIt = Solution.solveIt
 
 if __name__ == '__main__':
-	solver.main(Solution)
+	base_solver.main(Solution)
