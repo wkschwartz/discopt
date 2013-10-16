@@ -3,6 +3,9 @@ package gc;
 import java.util.Scanner;
 import java.util.BitSet;
 import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Collections;
 import java.io.IOException;
 import edu.princeton.cs.algs4.Graph;
 
@@ -114,6 +117,8 @@ public class KColor {
 		private int solved;
 		// Search tree depth
 		private int depth;
+		// For improving first-fail search order
+		private Comparator<Integer> order;
 
 		public SearchNode() {
 			domains = new BitSet[V];
@@ -126,6 +131,7 @@ public class KColor {
 			solved = 0;
 			depth = 0;
 			maxColor = 0;
+			order = new DomainSizeOrder();
 		}
 
 		// copy constructor
@@ -138,6 +144,16 @@ public class KColor {
 			solved = old.solved;
 			depth = old.depth + 1;
 			maxColor = old.maxColor;
+			order = new DomainSizeOrder();
+		}
+
+		/**
+		 * For sorting nodes by domain size for fail-first search.
+		 */
+		private class DomainSizeOrder implements Comparator<Integer> {
+			public int compare(Integer v, Integer w) {
+				return domains[v].cardinality() - domains[w].cardinality();
+			}
 		}
 
 		public int depth() { return depth; }
@@ -173,17 +189,21 @@ public class KColor {
 		}
 
 		/**
-		 * Return iterable of nodes not yet solved.
+		 * Return iterable of nodes not yet solved sorted first in ascending
+		 * order of domain size and second in descending order of degree. This
+		 * ordering should help find bad search paths faster, hopefully trimming
+		 * the search tree.
 		 */
 		public Iterable<Integer> unsolvedNodes() {
 			int count = 0;
-			LinkedList<Integer> nodes = new LinkedList<Integer>();
+			ArrayList<Integer> nodes = new ArrayList<Integer>(V - solved);
 			for (int v = 0; count < (V - solved) && v < V; v++) {
 				if (partial[v] == UNSOLVED) {
 					count++;
 					nodes.add(v);
 				}
 			}
+			Collections.sort(nodes, order);
 			return nodes;
 		}
 
