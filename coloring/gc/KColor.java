@@ -156,6 +156,9 @@ public class KColor {
 			}
 		}
 
+		/**
+		 * Return the search depth of this search node.
+		 */
 		public int depth() { return depth; }
 
 		/**
