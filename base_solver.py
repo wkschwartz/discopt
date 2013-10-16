@@ -97,7 +97,8 @@ def main(solver=JavaSolution):
 	if len(sys.argv) > 1:
 		printerr('unexpected arguments; feed data on stdin')
 		sys.exit(1)
-	print(solver.solveIt(sys.stdin.read(), time=True))
+	output = solver.solveIt(sys.stdin.read(), time=True)
+	print(output.decode('ascii'))
 	printerr('=' * screenwidth())
 
 
