@@ -1,6 +1,5 @@
 from __future__ import print_function
 
-from time import clock, time
 import sys
 import os
 from random import randrange
@@ -223,15 +222,9 @@ def solve(data):
 	printerr("building graph...")
 	graph = parse_graph(data)
 	printerr("building integer program...")
-	start = clock()
 	prob, choices, obj = build_lp(graph)
-	end = clock()
-	printerr("Done in %s s" % (end - start))
 	printerr("solving...")
-	start = clock()
 	prob.solve()
-	end = clock()
-	printerr("Done in %s s" % (end - start))
 	colors = []
 	for node in graph:
 		count = 0
@@ -247,7 +240,9 @@ def solve(data):
 		raise RuntimeError(reason)
 	return colors, int(obj.value()), pulp.LpStatus[prob.status] == "Optimal"
 
-def solveIt(data, time=True, assertions=True):
+def solveIt(data, time=False, assertions=True):
+	if time:
+		raise NotImplementedError('timer for PuLP solver not implemented :(')
 	solution, obj, optimal = solve(data)
 	ret = str(obj) + " " + ("1" if optimal else "0") + '\n'
 	ret += ' '.join(map(str, solution))
