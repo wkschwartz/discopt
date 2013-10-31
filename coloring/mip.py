@@ -195,7 +195,9 @@ def build_lp(graph, name=None):
 					problem += dec[node][color] + dec[neighbor][color] <= 1, msg
 			msg = "max constraint: node %s color %s" % (node, color)
 			problem += obj >= color * dec[node][color], msg
-		problem += pulp.lpSum(dec[node]) == 1, "One color for node %s" % node
+		# This next line is contrived to show the problem in pulp-py3
+		d = {i: d for i, d in enumerate(dec[node])}
+		problem += pulp.lpSum(d.values()) == 1, "One color for node %s" % node
 
 	return problem, dec, obj
 
